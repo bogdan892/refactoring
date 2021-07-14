@@ -1,5 +1,6 @@
 .history
-accounts.yml
+app/accounts.yml
 spec/fixtures/account.yml
 coverage
 .DS_Store
+.idea

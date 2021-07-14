@@ -1,0 +1,76 @@
+en:
+  common:
+    create_first_account: 'There is no active accounts, do you want to be the first?[y/n]'
+    destroy_account: 'Are you sure you want to destroy account?[y/n]'
+    if_you_want_to_delete: 'If you want to delete:'
+    choose_card: 'Choose the card for putting:'
+    choose_card_withdrawing: 'Choose the card for withdrawing:'
+    choose_card_sending: 'Choose the card for sending:'
+    recipient_card: 'Enter the recipient card:'
+    input_amount: 'Input the amount of money you want to put on your card'
+    withdraw_amount: 'Input the amount of money you want to withdraw'
+    send_amount: 'Input the amount of money you want to send'
+    destroy_card: 'Are you sure you want to delete %{number}?[y/n]'
+    press_to_choose: '- %{number}, %{type}, press %{index}'
+    press_exit: |
+      press `exit` to exit
+  hello: |
+    Hello, we are RubyG bank!
+    - If you want to create account - press `create`
+    - If you want to load account - press `load`
+    - If you want to exit - press `exit`
+  user:
+    name: 'Enter your name'
+    login: 'Enter your login'
+    age: 'Enter your age'
+    password: 'Enter your password'
+  create_card: |
+    You could create one of 3 card types
+    - Usual card. 2% tax on card INCOME. 20$ tax on SENDING money from this card. 5% tax on WITHDRAWING money. For creation this card - press `usual`
+    - Capitalist card. 10$ tax on card INCOME. 10% tax on SENDING money from this card. 4$ tax on WITHDRAWING money. For creation this card - press `capitalist`
+    - Virtual card. 1$ tax on card INCOME. 1$ tax on SENDING money from this card. 12% tax on WITHDRAWING money. For creation this card - press `virtual`
+    - For exit - press `exit`
+  account_validation:
+    name:
+      first_letter: 'Your name must not be empty and starts with first upcase letter'
+    login:
+      present: 'Login must present'
+      longer: 'Login must be longer then %{min} symbols'
+      shorter: 'Login must be shorter then %{max} symbols'
+      exists: 'Such account is already exists'
+    password:
+      present: 'Password must present'
+      longer: 'Password must be longer then %{min} symbols'
+      shorter: 'Password must be shorter then %{max} symbols'
+    age:
+      length: 'Your Age must be greeter then %{min} and lower then %{max}'
+  error:
+    user_not_exists: 'There is no account with given credentials'
+    wrong_command: 'Wrong command. Try again!'
+    no_active_cards: |
+      There is no active cards!
+    wrong_card_type: |
+      Wrong card type. Try again!
+    wrong_number: |
+      You entered wrong number!
+    invalid_amount: You must input correct amount of money
+    tax_higher: Your tax is higher than input amount
+    no_card_with_number: |
+      There is no card with number %{number}
+    wrong_card_number: 'Please, input correct number of card'
+    not_enough_money: "You don't have enough money on card for such operation"
+    not_enough_money_sender_card: 'There is no enough money on sender card'
+  put_money: 'Money %{amount} was put on %{number}. Balance: %{balance}. Tax: %{tax}'
+  withdraw_money: 'Money %{amount} withdrawed from %{number}$. Money left: %{balance}$. Tax: %{tax}$'
+  send_money: 'Money %{amount} was send from %{number}. Balance: %{balance}. Tax: %{tax}'
+  main_operations: |-
+    Welcome, %{name}
+    If you want to:
+    - show all cards - press SC
+    - create card - press CC
+    - destroy card - press DC
+    - put money on card - press PM
+    - withdraw money on card - press WM
+    - send money to another card  - press SM
+    - destroy account - press `DA`
+    - exit from account - press `exit`
