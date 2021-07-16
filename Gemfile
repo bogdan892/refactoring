@@ -8,7 +8,6 @@ group :development do
   gem 'fasterer'
   gem 'i18n'
   gem 'pry'
-  gem 'reek'
   gem 'rubocop'
   gem 'rubocop-rspec'
 end
