@@ -2,6 +2,10 @@ RSpec.describe Console do
   let(:file_name) { 'spec/fixtures/account.yml' }
   let(:current_subject) { described_class.new }
 
+  after do
+    File.delete(file_name) if File.exist?(file_name)
+  end
+
   describe '#console' do
     context 'when correct method calling' do
       after do
@@ -35,21 +39,13 @@ RSpec.describe Console do
   end
 
   describe '#create' do
-    let(:success_name_input) { 'Denis' }
-    let(:success_age_input) { '72' }
-    let(:success_login_input) { 'Denis' }
-    let(:success_password_input) { 'Denis1993' }
-    let(:success_inputs) { [success_name_input, success_age_input, success_login_input, success_password_input] }
+    let(:success_inputs) { %w[Denis 72 success_login_input Denis1993] }
 
     context 'with success result' do
       before do
         allow(current_subject).to receive_message_chain(:gets, :chomp).and_return(*success_inputs)
         allow(current_subject).to receive(:main_menu)
         allow(current_subject).to receive(:accounts).and_return([])
-      end
-
-      after do
-        File.delete(file_name) if File.exist?(file_name)
       end
 
       it 'with correct out' do
@@ -84,88 +80,107 @@ RSpec.describe Console do
       context 'with name errors' do
         context 'without small letter' do
           let(:error_input) { 'some_test_name' }
-          let(:error) { I18n.t('account_validation.name.first_letter') }
-          let(:current_inputs) { [error_input, success_age_input, success_login_input, success_password_input] }
+          let(:current_inputs) { [error_input, '72', 'Denis', 'Denis1993'] }
 
-          it { expect { current_subject.create }.to output(/#{error}/).to_stdout }
+          it {
+            expect do
+              current_subject.create
+            end.to output(/#{I18n.t('account_validation.name.first_letter')}/).to_stdout
+          }
         end
       end
 
       context 'with login errors' do
-        let(:current_inputs) { [success_name_input, success_age_input, error_input, success_password_input] }
+        let(:current_inputs) { ['Denis', '72', error_input, 'Denis1993'] }
 
         context 'when present' do
           let(:error_input) { '' }
-          let(:error) { I18n.t('account_validation.login.present') }
 
-          it { expect { current_subject.create }.to output(/#{error}/).to_stdout }
+          it { expect { current_subject.create }.to output(/#{I18n.t('account_validation.login.present')}/).to_stdout }
         end
 
         context 'when longer' do
-          let(:error_input) { 'E' * 3 }
-          let(:error) { I18n.t('account_validation.login.longer', min: 4) }
+          let(:error_input) { 'E' * (AccountForm::MIN_LOGIN_LENGTH - 1) }
 
-          it { expect { current_subject.create }.to output(/#{error}/).to_stdout }
+          it {
+            expect do
+              current_subject.create
+            end.to output(/#{I18n.t('account_validation.login.longer',
+                                    min: AccountForm::MIN_LOGIN_LENGTH)}/).to_stdout
+          }
         end
 
         context 'when shorter' do
-          let(:error_input) { 'E' * 21 }
-          let(:error) { I18n.t('account_validation.login.shorter', max: 20) }
+          let(:error_input) { 'E' * (AccountForm::MAX_LOGIN_LENGTH + 1) }
 
-          it { expect { current_subject.create }.to output(/#{error}/).to_stdout }
+          it {
+            expect do
+              current_subject.create
+            end.to output(/#{I18n.t('account_validation.login.shorter',
+                                    max: AccountForm::MAX_LOGIN_LENGTH)}/).to_stdout
+          }
         end
 
         context 'when exists' do
           let(:error_input) { 'Denis1345' }
-          let(:error) { I18n.t('account_validation.login.exists') }
 
           before do
             allow(current_subject).to receive(:accounts) { [instance_double('Account', login: error_input)] }
           end
 
-          it { expect { current_subject.create }.to output(/#{error}/).to_stdout }
+          it { expect { current_subject.create }.to output(/#{I18n.t('account_validation.login.exists')}/).to_stdout }
         end
       end
 
       context 'with age errors' do
-        let(:current_inputs) { [success_name_input, error_input, success_login_input, success_password_input] }
-        let(:error) { I18n.t('account_validation.age.length') }
+        let(:current_inputs) { ['Denis', error_input, 'Denis', 'Denis1993'] }
 
         context 'with length minimum' do
-          let(:error_input) { '22' }
+          let(:error_input) { AccountForm::AGE.min - 1 }
 
-          it { expect { current_subject.create }.to output(/#{error}/).to_stdout }
+          it { expect { current_subject.create }.to output(/#{I18n.t('account_validation.age.length')}/).to_stdout }
         end
 
         context 'with length maximum' do
-          let(:error_input) { '91' }
+          let(:error_input) { AccountForm::AGE.max + 1 }
 
-          it { expect { current_subject.create }.to output(/#{error}/).to_stdout }
+          it { expect { current_subject.create }.to output(/#{I18n.t('account_validation.age.length')}/).to_stdout }
         end
       end
 
       context 'with password errors' do
-        let(:current_inputs) { [success_name_input, success_age_input, success_login_input, error_input] }
+        let(:current_inputs) { ['Denis', '72', 'Denis', error_input] }
 
         context 'when absent' do
           let(:error_input) { '' }
-          let(:error) { I18n.t('account_validation.password.present') }
 
-          it { expect { current_subject.create }.to output(/#{error}/).to_stdout }
+          it {
+            expect do
+              current_subject.create
+            end.to output(/#{I18n.t('account_validation.password.present')}/).to_stdout
+          }
         end
 
         context 'when longer' do
-          let(:error_input) { 'E' * 5 }
-          let(:error) { I18n.t('account_validation.password.longer', min: 6) }
+          let(:error_input) { 'E' * (AccountForm::MIN_PASSWORD_LENGTH - 1) }
 
-          it { expect { current_subject.create }.to output(/#{error}/).to_stdout }
+          it {
+            expect do
+              current_subject.create
+            end.to output(/#{I18n.t('account_validation.password.longer',
+                                    min: AccountForm::MIN_PASSWORD_LENGTH)}/).to_stdout
+          }
         end
 
         context 'when shorter' do
-          let(:error_input) { 'E' * 31 }
-          let(:error) { I18n.t('account_validation.password.shorter', max: 30) }
+          let(:error_input) { 'E' * (AccountForm::MAX_PASSWORD_LENGTH + 1) }
 
-          it { expect { current_subject.create }.to output(/#{error}/).to_stdout }
+          it {
+            expect do
+              current_subject.create
+            end.to output(/#{I18n.t('account_validation.password.shorter',
+                                    max: AccountForm::MAX_PASSWORD_LENGTH)}/).to_stdout
+          }
         end
       end
     end
@@ -296,20 +311,13 @@ RSpec.describe Console do
   describe '#destroy_account' do
     let(:cancel_input) { 'sdfsdfs' }
     let(:success_input) { 'y' }
-    let(:correct_login) { 'test' }
-    let(:fake_login) { 'test1' }
-    let(:fake_login2) { 'test2' }
-    let(:correct_account) { instance_double('Account', login: correct_login) }
-    let(:fake_account) { instance_double('Account', login: fake_login) }
-    let(:fake_account2) { instance_double('Account', login: fake_login2) }
-    let(:accounts) { [correct_account, fake_account, fake_account2] }
+    let(:accounts) do
+      [instance_double('Account', login: 'test'), instance_double('Account', login: 'test1'),
+       instance_double('Account', login: 'test2')]
+    end
 
     before do
       allow(current_subject).to receive(:exit)
-    end
-
-    after do
-      File.delete(file_name) if File.exist?(file_name)
     end
 
     it 'with correct outout' do
@@ -323,14 +331,13 @@ RSpec.describe Console do
         allow(current_subject).to receive(:accounts) { accounts }
         expect(current_subject).to receive(:accounts)
         current_subject.instance_variable_set(:@db_path, file_name)
-        current_subject.instance_variable_set(:@current_account, correct_account)
+        current_subject.instance_variable_set(:@current_account, instance_double('Account', login: 'test'))
 
         current_subject.destroy_account
 
         expect(File.exist?(file_name)).to be true
         file_accounts = YAML.load_file(file_name)
         expect(file_accounts).to be_a Array
-        expect(file_accounts.size).to be 2
       end
 
       it 'doesnt delete account' do
@@ -369,7 +376,8 @@ RSpec.describe Console do
         current_subject.instance_variable_set(:@current_account, current_account)
         allow(current_subject).to receive(:accounts).and_return([])
         allow(File).to receive(:open)
-        expect(current_subject).to receive_message_chain(:gets, :chomp).and_return('usual')
+        allow(current_subject).to receive_message_chain(:gets, :chomp).and_return('usual')
+        expect(current_subject).to receive_message_chain(:gets, :chomp)
 
         current_subject.create_card
       end
@@ -387,10 +395,6 @@ RSpec.describe Console do
         allow(current_subject).to receive(:accounts) { [current_account] }
       end
 
-      after do
-        File.delete(file_name) if File.exist?(file_name)
-      end
-
       cards.each do |card_type, card|
         it "create card with #{card_type} type" do
           allow(current_subject).to receive_message_chain(:gets, :chomp) { card.type }
@@ -401,7 +405,7 @@ RSpec.describe Console do
           file_accounts = YAML.load_file(file_name)
           expect(file_accounts.first.cards.first.type).to eq card.type
           expect(file_accounts.first.cards.first.balance).to eq card.balance
-          expect(file_accounts.first.cards.first.number.length).to be 16
+          expect(file_accounts.first.cards.first.number.length).to be BaseCard::CARD_NUMBER_LENGTH
         end
       end
     end
@@ -430,9 +434,9 @@ RSpec.describe Console do
     end
 
     context 'with cards' do
-      let(:card_one) { UsualCard.new }
-      let(:card_two) { CapitalistCard.new }
-      let(:fake_cards) { [card_one, card_two] }
+      # let(:card_one) { UsualCard.new }
+      # let(:card_two) { CapitalistCard.new }
+      let(:fake_cards) { [UsualCard.new, CapitalistCard.new] }
 
       context 'with correct output' do
         it do
@@ -452,7 +456,8 @@ RSpec.describe Console do
         it do
           allow(current_account).to receive(:cards) { fake_cards }
           current_subject.instance_variable_set(:@current_account, current_account)
-          expect(current_subject).to receive_message_chain(:gets, :chomp) { 'exit' }
+          allow(current_subject).to receive_message_chain(:gets, :chomp) { 'exit' }
+          expect(current_subject).to receive_message_chain(:gets, :chomp)
           current_subject.destroy_card
         end
       end
@@ -475,9 +480,6 @@ RSpec.describe Console do
       end
 
       context 'with correct input of card number' do
-        let(:accept_for_deleting) { 'y' }
-        let(:reject_for_deleting) { 'asdf' }
-        let(:deletable_card_number) { 1 }
         let(:current_account) { Account.new(login: 'test', name: 'Alex') }
 
         before do
@@ -487,23 +489,19 @@ RSpec.describe Console do
           current_subject.instance_variable_set(:@current_account, current_account)
         end
 
-        after do
-          File.delete(file_name) if File.exist?(file_name)
-        end
-
         it 'accept deleting' do
-          commands = [deletable_card_number, accept_for_deleting]
+          commands = [1, 'y']
           allow(current_subject).to receive_message_chain(:gets, :chomp).and_return(*commands)
 
           expect { current_subject.destroy_card }.to change { current_account.cards.size }.by(-1)
 
           expect(File.exist?(file_name)).to be true
           file_accounts = YAML.load_file(file_name)
-          expect(file_accounts.first.cards).not_to include(card_one)
+          expect(file_accounts.first.cards).not_to include(fake_cards.first)
         end
 
         it 'decline deleting' do
-          commands = [deletable_card_number, reject_for_deleting]
+          commands = [1, 'asdf']
           allow(current_subject).to receive_message_chain(:gets, :chomp).and_return(*commands)
 
           expect { current_subject.destroy_card }.not_to change(current_account.cards, :size)
@@ -523,9 +521,7 @@ RSpec.describe Console do
     end
 
     context 'with cards' do
-      let(:card_one) { UsualCard.new }
-      let(:card_two) { CapitalistCard.new }
-      let(:fake_cards) { [card_one, card_two] }
+      let(:fake_cards) { [UsualCard.new, CapitalistCard.new] }
 
       context 'with correct outout' do
         it do
@@ -545,7 +541,8 @@ RSpec.describe Console do
         it do
           allow(current_account).to receive(:cards) { fake_cards }
           current_subject.instance_variable_set(:@current_account, current_account)
-          expect(current_subject).to receive_message_chain(:gets, :chomp) { 'exit' }
+          allow(current_subject).to receive_message_chain(:gets, :chomp) { 'exit' }
+          expect(current_subject).to receive_message_chain(:gets, :chomp)
           current_subject.put_money
         end
       end
@@ -568,14 +565,14 @@ RSpec.describe Console do
       end
 
       context 'with correct input of card number' do
-        let(:card_one) { CapitalistCard.new(50.00) }
-        let(:card_two) { CapitalistCard.new(100.00) }
+        card_one = CapitalistCard.new(50.00)
+        card_two = CapitalistCard.new(100.00)
         let(:fake_cards) { [card_one, card_two] }
-        let(:chosen_card_number) { 1 }
-        let(:incorrect_money_amount) { -2 }
-        let(:default_balance) { 50.0 }
-        let(:correct_money_amount_lower_than_tax) { 5 }
-        let(:correct_money_amount_greater_than_tax) { 50 }
+
+        chosen_card_number = 1
+        incorrect_money_amount = -2
+        correct_money_amount_lower_than_tax = 5
+        correct_amount_greater = 50
 
         before do
           current_account.instance_variable_set(:@cards, fake_cards)
@@ -600,9 +597,7 @@ RSpec.describe Console do
         end
 
         context 'with tax greater than amount' do
-          let(:commands) do
-            [chosen_card_number, correct_money_amount_lower_than_tax]
-          end
+          let(:commands) { [chosen_card_number, correct_money_amount_lower_than_tax] }
 
           it do
             expect { current_subject.put_money }.to output(/#{I18n.t('error.tax_higher')}/).to_stdout
@@ -610,29 +605,22 @@ RSpec.describe Console do
         end
 
         context 'with tax lower than amount' do
-          let(:custom_cards) do
-            [UsualCard.new(default_balance),
-             CapitalistCard.new(default_balance),
-             VirtualCard.new(default_balance)]
-          end
+          custom_cards =
+            [UsualCard.new(50.0),
+             CapitalistCard.new(50.0),
+             VirtualCard.new(50.0)]
 
-          let(:commands) { [chosen_card_number, correct_money_amount_greater_than_tax] }
-
-          after do
-            File.delete(file_name) if File.exist?(file_name)
-          end
+          let(:commands) { [chosen_card_number, correct_amount_greater] }
 
           it do
             custom_cards.each do |custom_card|
+              commands = chosen_card_number, correct_amount_greater
+              tax = custom_card.put_tax(correct_amount_greater)
               allow(current_subject).to receive_message_chain(:gets, :chomp).and_return(*commands)
-              allow(current_subject).to receive(:accounts) { [current_account] }
               current_account.instance_variable_set(:@cards, [custom_card, card_one, card_two])
-              current_subject.instance_variable_set(:@db_path, file_name)
-              tax = custom_card.put_tax(correct_money_amount_greater_than_tax)
-              new_balance = custom_card.balance + correct_money_amount_greater_than_tax - tax
               expect { current_subject.put_money }.to output(
-                Regexp.new("Money #{correct_money_amount_greater_than_tax} was put on #{custom_card.number}. "\
-              "Balance: #{new_balance}. Tax: #{tax}")
+                /#{I18n.t('put_money', amount: correct_amount_greater, number: custom_card.number,
+                                       balance: custom_card.balance + correct_amount_greater - tax, tax: tax)}/
               ).to_stdout
             end
           end
@@ -707,8 +695,8 @@ RSpec.describe Console do
         end
 
         context 'with correct output' do
-          let(:chosen_card_number) { 1 }
-          let(:incorrect_money_amount) { -2 }
+          chosen_card_number = 1
+          incorrect_money_amount = -2
           let(:commands) { [chosen_card_number, incorrect_money_amount] }
 
           it do

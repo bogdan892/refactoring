@@ -4,6 +4,7 @@ class BaseCard
     'CapitalistCard' => :capitalist,
     'VirtualCard' => :virtual
   }.freeze
+  CARD_NUMBER_LENGTH = 16
 
   attr_reader :balance
 
@@ -25,7 +26,7 @@ class BaseCard
   end
 
   def number
-    @number ||= Array.new(16) { rand(9) }.join
+    @number ||= Array.new(CARD_NUMBER_LENGTH) { rand(9) }.join
   end
 
   def withdraw_money(amount)
