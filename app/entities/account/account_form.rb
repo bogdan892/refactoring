@@ -8,19 +8,16 @@ class AccountForm < ValidableEntity
   def initialize(action, data)
     super()
     @action = action
-    @login = data[:login]
-    @password = data[:password]
-    @name = data[:name]
-    @age = data[:age]
+    @data = data
   end
 
   def create_account
-    @action.create_account(name: @name, age: @age, login: @login, password: @password)
+    @action.create_account(name: @data[:name], age: @data[:age], login: @data[:login], password: @data[:password])
   end
 
   private
 
-  def validate
+  def validate(_data = @data)
     validate_name
     validate_age
     validate_login
@@ -29,31 +26,31 @@ class AccountForm < ValidableEntity
   end
 
   def account_exists?
-    @action.account_exists?(@login)
+    @action.account_exists?(@data[:login])
   end
 
   def login_short?
-    @login.length < MIN_LOGIN_LENGTH
+    @data[:login].length < MIN_LOGIN_LENGTH
   end
 
   def login_long?
-    @login.length > MAX_LOGIN_LENGTH
+    @data[:login].length > MAX_LOGIN_LENGTH
   end
 
   def password_short?
-    @password.length < MIN_PASSWORD_LENGTH
+    @data[:password].length < MIN_PASSWORD_LENGTH
   end
 
   def password_long?
-    @password.length > MAX_PASSWORD_LENGTH
+    @data[:password].length > MAX_PASSWORD_LENGTH
   end
 
   def age_invalid?
-    !AGE.member?(@age)
+    !AGE.member?(@data[:age])
   end
 
   def name_invalid?
-    @name.empty? || @name[0].upcase != @name[0]
+    @data[:name].empty? || @data[:name][0].upcase != @data[:name][0]
   end
 
   def validate_name
@@ -65,13 +62,13 @@ class AccountForm < ValidableEntity
   end
 
   def validate_login
-    errors << I18n.t('account_validation.login.present') if @login.empty?
+    errors << I18n.t('account_validation.login.present') if @data[:login].empty?
     errors << I18n.t('account_validation.login.longer', min: MIN_LOGIN_LENGTH) if login_short?
     errors << I18n.t('account_validation.login.shorter', max: MAX_LOGIN_LENGTH) if login_long?
   end
 
   def validate_password
-    errors << I18n.t('account_validation.password.present') if @password.empty?
+    errors << I18n.t('account_validation.password.present') if @data[:password].empty?
     errors << I18n.t('account_validation.password.longer', min: MIN_PASSWORD_LENGTH) if password_short?
     errors << I18n.t('account_validation.password.shorter', max: MAX_PASSWORD_LENGTH) if password_long?
   end

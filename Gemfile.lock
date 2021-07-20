@@ -14,7 +14,6 @@ GEM
       concurrent-ruby (~> 1.0)
     imagen (0.1.8)
       parser (>= 2.5, != 2.5.1.1)
-    kwalify (0.7.2)
     method_source (1.0.0)
     parallel (1.20.1)
     parser (3.0.2.0)
@@ -22,13 +21,7 @@ GEM
     pry (0.14.1)
       coderay (~> 1.1)
       method_source (~> 1.0)
-    psych (3.3.2)
     rainbow (3.0.0)
-    reek (6.0.4)
-      kwalify (~> 0.7.0)
-      parser (~> 3.0.0)
-      psych (~> 3.1)
-      rainbow (>= 2.0, < 4.0)
     regexp_parser (2.1.1)
     rexml (3.2.5)
     rspec (3.10.0)
@@ -53,7 +46,7 @@ GEM
       rubocop-ast (>= 1.7.0, < 2.0)
       ruby-progressbar (~> 1.7)
       unicode-display_width (>= 1.4.0, < 3.0)
-    rubocop-ast (1.7.0)
+    rubocop-ast (1.8.0)
       parser (>= 3.0.1.1)
     rubocop-rspec (2.4.0)
       rubocop (~> 1.0)
@@ -83,8 +76,7 @@ DEPENDENCIES
   fasterer
   i18n
   pry
-  reek
-  rspec (~> 3.0)
+  rspec
   rubocop
   rubocop-rspec
   simplecov

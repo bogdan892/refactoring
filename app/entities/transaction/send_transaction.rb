@@ -1,6 +1,6 @@
 class SendTransaction < BaseTransaction
   def initialize(sender_card, recipient_card, amount)
-    super()
+    super('card', 'amount')
     @sender_card = sender_card
     @recipient_card = recipient_card
     @amount = amount
