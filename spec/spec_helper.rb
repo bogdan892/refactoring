@@ -2,10 +2,10 @@ require 'simplecov'
 require 'undercover'
 
 SimpleCov.start do
-  add_filter(%r{\/spec\/})
+  add_filter(%r{/spec/})
 end
 
-require_relative '../account'
+require_relative '../app/dependencies'
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|

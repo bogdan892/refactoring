@@ -1,3 +1,3 @@
-require_relative 'account'
+require_relative 'app/dependencies'
 
-Account.new.console
+Console.new.console
